@@ -143,14 +143,14 @@ module top
         if (!rst) begin
             line_count       <=  16'b0;    
             pixel_count      <=  16'b0;
-			vmem_start_col	 <=  0 - `START_X;
-			vmem_start_row	 <=  0 - `START_Y; 
+			vmem_start_col	 <=  16'b0 - `START_X;
+			vmem_start_row	 <=  16'b0 - `START_Y; 
             end
         else begin
 			pixel_count 	 <= __pixel_count;
 			line_count 		 <= __line_count;
 			vmem_start_col	 <= __vmem_start_col;
-			vmem_start_row	 <= __vmem_start_col; 
+			vmem_start_row	 <= __vmem_start_row; 
 		end
 	end
 
