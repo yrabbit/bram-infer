@@ -84,6 +84,7 @@ module top
     localparam      PixelForHS  =   WidthPixel + HBackPorch + HFrontPorch;  	
     localparam      LineForVS   =   HightPixel + VBackPorch + VFrontPorch;
 
+	/*
     always @(posedge pixel_clk or negedge rst)begin
         if (!rst) begin
             line_count       <=  16'b0;    
@@ -101,6 +102,57 @@ module top
             pixel_count       <=  pixel_count + 1'b1;
         end
     end
+	*/
+
+
+
+	`define START_X 16'd160
+	`define STOP_X  (`START_X + 16'd256)
+	`define START_Y 16'd18
+	`define STOP_Y  (`START_Y + 16'd256)
+
+
+	reg 		[15:0] __pixel_count;
+	reg			[15:0] __line_count;
+	reg 		[7:0] __vmem_start_col;
+	reg 		[7:0] __vmem_start_row; 
+	
+	always @(*) begin
+		__pixel_count 			= pixel_count;
+		__line_count 		   	= line_count; 
+		if (pixel_count == PixelForHS) begin
+            __pixel_count      	=  16'b0;
+            __line_count       	=  line_count + 1'b1;
+            end
+        else if (line_count == LineForVS) begin
+            __line_count       	=  16'b0;
+            __pixel_count      	=  16'b0;
+            end
+        else begin
+            __pixel_count      	=  pixel_count + 1'b1;
+        end
+
+		__vmem_start_col 		= __pixel_count - `START_X;
+		__vmem_start_row 		= __line_count - `START_Y;
+	end
+
+	reg [7:0] vmem_start_col;
+	reg [7:0] vmem_start_row;
+
+	always @(posedge pixel_clk or negedge rst)begin
+        if (!rst) begin
+            line_count       <=  16'b0;    
+            pixel_count      <=  16'b0;
+			vmem_start_col	 <=  0 - `START_X;
+			vmem_start_row	 <=  0 - `START_Y; 
+            end
+        else begin
+			pixel_count 	 <= __pixel_count;
+			line_count 		 <= __line_count;
+			vmem_start_col	 <= __vmem_start_col;
+			vmem_start_row	 <= __vmem_start_col; 
+		end
+	end
 
 
     assign  LCD_HYNC = ((pixel_count >= HPulse) && (pixel_count <= (PixelForHS - HFrontPorch))) ? 1'b0 : 1'b1;
@@ -141,17 +193,19 @@ module top
 		.write_data(rom_data)
 	);
 
-`define START_X 16'd160
-`define STOP_X  (`START_X + 16'd256)
-`define START_Y 16'd18
-`define STOP_Y  (`START_Y + 16'd256)
  
-	wire [7:0] vmem_start_col;
-	wire [7:0] vmem_start_row;
-	assign vmem_start_col = pixel_count - `START_X;
-	assign vmem_start_row = line_count - `START_Y;
+
+	// wire [7:0] vmem_start_col;
+	// wire [7:0] vmem_start_row;
+	// assign vmem_start_col = pixel_count - `START_X;
+	// assign vmem_start_row = line_count - `START_Y;
 	
-	always @(negedge pixel_clk) begin
+	// always @(negedge pixel_clk) begin
+	// 	read_addr <= {vmem_start_row[7:2], vmem_start_col[7:2]}; 
+	// end
+
+	//routed directly from registers so this should be fine
+	always @(*) begin
 		read_addr <= {vmem_start_row[7:2], vmem_start_col[7:2]}; 
 	end
 
