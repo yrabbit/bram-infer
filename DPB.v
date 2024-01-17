@@ -182,8 +182,10 @@ module top
 	end
 
 
+	assign LCD_G = dout[5:0];
+
     assign LCD_R = color[4:0];
-    assign LCD_G = color[5:0];
+    //assign LCD_G = color[5:0];
     assign LCD_B = color[7:3];
 endmodule
 
