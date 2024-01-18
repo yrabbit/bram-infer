@@ -10,7 +10,6 @@ module top
 	output  wire LCD_XR,
 	output  wire LCD_XL,
 	output  wire LCD_YD,
-	output  wire tlvds_p,
 	output	wire LCD_CLK,
 	output	wire LCD_HYNC,
 	output	wire LCD_SYNC,
